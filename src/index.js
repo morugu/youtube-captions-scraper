@@ -26,20 +26,19 @@ export async function getSubtitles({
   const [match] = regex.exec(decodedData);
   const { captionTracks } = JSON.parse(`${match}}`);
 
-  const subtitle =
-    find(captionTracks, {
-      vssId: `.${lang}`,
-    }) ||
-    find(captionTracks, {
-      vssId: `a.${lang}`,
-    }) ||
-    find(captionTracks, ({ vssId }) => vssId && vssId.match(`.${lang}`));
+  if (!captionTracks) {
+    throw new Error(`Could not find captions for ${videoID}`);    
+  }
+  const subtitle = captionTracks[0];
 
   // * ensure we have found the correct subtitle lang
   if (!subtitle || (subtitle && !subtitle.baseUrl))
     throw new Error(`Could not find ${lang} captions for ${videoID}`);
 
-  const { data: transcript } = await axios.get(subtitle.baseUrl);
+  const subtitleUrl = subtitle.languageCode === lang ? subtitle.baseUrl : `${subtitle.baseUrl}&tlang=${lang}`
+    console.log(subtitleUrl);
+
+  const { data: transcript } = await axios.get(subtitleUrl);
   const lines = transcript
     .replace('<?xml version="1.0" encoding="utf-8" ?><transcript>', '')
     .replace('</transcript>', '')
