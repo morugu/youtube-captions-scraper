@@ -36,7 +36,6 @@ export async function getSubtitles({
     throw new Error(`Could not find ${lang} captions for ${videoID}`);
 
   const subtitleUrl = subtitle.languageCode === lang ? subtitle.baseUrl : `${subtitle.baseUrl}&tlang=${lang}`
-    console.log(subtitleUrl);
 
   const { data: transcript } = await axios.get(subtitleUrl);
   const lines = transcript
